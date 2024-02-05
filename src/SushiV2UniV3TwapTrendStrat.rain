@@ -1,0 +1,92 @@
+#trade-token-address 0x692AC1e363ae34b6B489148152b12e2785a3d8d6
+#trade-token-decimals 18
+#usdt-token-address 0xc2132D05D31c914a87C6611C10748AEb04B58e8F
+#usdt-token-decimals 6
+#mean-amount 166666666666666666666
+#mean-cooldown 1440e18
+#randomized-seed 0x844298f03374ebab272d6aea77dd06a67ca29d81adbe996adfd748ae279abd97
+#initial-tracker-value 0x5555555555555555555555555555555555555555555555555555555555555555
+#bounty 8e16
+
+#twap-long-time 14400
+#twap-short-time 1800
+#skew-factor 3e17
+
+#ensure-cooldown
+  last-time target-cooldown18:,
+  cooldown-random-multiplier18: call<'jittery-binomial 1>(hash(last-time)),
+  cooldown18: decimal18-mul(decimal18-mul(target-cooldown18 2e18) cooldown-random-multiplier18),
+  cooldown: decimal18-scale-n<0>(cooldown18),
+  :ensure<1>(less-than(int-add(last-time cooldown) block-timestamp()));
+
+#jittery-binomial
+  input:,
+  binomial18-10: decimal18-scale18<0>(bitwise-count-ones(bitwise-decode<0 10>(hash(input)))),
+  noise18-1: int-mod(hash(input 0) 1e18),
+  jittery-11: decimal18-add(binomial18-10 noise18-1),
+  jittery-1: decimal18-div(jittery-11 11e18);
+
+#target-usdt
+  last-time target-usdt18:,
+  amount-random-multiplier18: call<'jittery-binomial 1>(last-time),
+  amount-usdt18: decimal18-mul(decimal18-mul(target-usdt18 2e18) amount-random-multiplier18),
+  amount-usdt6: decimal18-scale-n<6>(amount-usdt18);
+
+#prelude
+  last-time: get(order-hash()),
+  :set(
+    order-hash()
+    block-timestamp()
+  ),
+  :call<'ensure-cooldown 0>(last-time mean-cooldown),
+  jittered-amount-usdt18 jittered-amount-usdt6: call<'target-usdt 2>(last-time mean-amount),
+  short-twap-output-ratio: uniswap-v3-twap-output-ratio(
+    usdt-token-address usdt-token-decimals
+    trade-token-address trade-token-decimals
+    twap-short-time 0
+    [uniswap-v3-fee-high]
+  ),
+  long-twap-output-ratio: uniswap-v3-twap-output-ratio(
+    usdt-token-address usdt-token-decimals
+    trade-token-address trade-token-decimals
+    twap-long-time 0
+    [uniswap-v3-fee-high]
+  );
+
+#sell-order-calculate-io
+  jittered-amount-usdt18 _
+  short-twap-output-ratio
+  long-twap-output-ratio: call<'prelude 4>(),
+  sell-ratio: decimal18-div(short-twap-output-ratio long-twap-output-ratio),
+  skewed-sell-ratio: if(
+    less-than(sell-ratio 1e18)
+    decimal18-power(sell-ratio decimal18-sub(1e18 skew-factor))
+    decimal18-power(sell-ratio decimal18-add(1e18 skew-factor))
+  ),
+  amount-usdt18: decimal18-mul(jittered-amount-usdt18 skewed-sell-ratio),
+  amount-usdt6: decimal18-scale-n<6>(amount-usdt18),
+  trade-amount18: uniswap-v2-quote-exact-output(trade-token-address usdt-token-address amount-usdt6),
+  order-output-max18: trade-amount18,
+  io-ratio: decimal18-div(decimal18-sub(amount-usdt18 bounty) order-output-max18);
+
+#sell-order-handle-io
+  :ensure<5>(greater-than-or-equal-to(output-vault-balance-decrease() calculated-max-output()));
+
+#buy-order-calculate-io
+  jittered-amount-usdt18 _
+  short-twap-output-ratio
+  long-twap-output-ratio: call<'prelude 4>(),
+  buy-ratio: decimal18-div(long-twap-output-ratio short-twap-output-ratio),
+  skewed-buy-ratio: if(
+    less-than(buy-ratio 1e18)
+    decimal18-power(buy-ratio decimal18-add(1e18 skew-factor))
+    decimal18-power(buy-ratio decimal18-sub(1e18 skew-factor))
+  ),
+  amount-usdt18: decimal18-mul(jittered-amount-usdt18 skewed-buy-ratio),
+  amount-usdt6: decimal18-scale-n<6>(amount-usdt18),
+  trade-amount18: uniswap-v2-quote-exact-input(usdt-token-address trade-token-address amount-usdt6),
+  order-output-max18: decimal18-add(amount-usdt18 bounty),
+  io-ratio: decimal18-div(trade-amount18 order-output-max18);
+
+#buy-order-handle-io
+  :ensure<9>(greater-than-or-equal-to(output-vault-balance-decrease() decimal18-scale-n<6>(calculated-max-output())));
