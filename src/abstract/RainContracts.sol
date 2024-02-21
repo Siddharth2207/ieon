@@ -70,7 +70,6 @@ abstract contract RainContracts {
 
     function deployOrderBook() public {
         ORDERBOOK = new OrderBook();
-        ORDERBOOK_SUPARSER = new OrderBookSubParser();
     }
 
     function deployOrderBookSubparser() public {

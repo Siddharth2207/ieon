@@ -9,12 +9,31 @@ import "src/TrancheMirror.sol";
 contract TrancheMirrorTest is TrancheMirrorUtils {
     
     function testParseOrder() public {
+        console2.log("PARSER : ",address(PARSER));
+        console2.log("INTERPRETER : ",address(INTERPRETER));
+        console2.log("STORE : ",address(STORE));
+        console2.log("EXPRESSION_DEPLOYER : ",address(EXPRESSION_DEPLOYER));
+        console2.log("ORDERBOOK_SUPARSER : ",address(ORDERBOOK_SUPARSER)); 
+
+
         PARSER.parse(
             LibTrancheSpreadOrders.getTrancheSpreadBuyOrder(
                 vm,
-                address(ORDERBOOK_SUPARSER),
-                address(UNISWAP_WORDS)
+                address(ORDERBOOK_SUPARSER)
             )
+        );
+    }
+
+    function testParseOrderRainlang() public {
+        console2.log("PARSER : ",address(PARSER));
+        console2.log("INTERPRETER : ",address(INTERPRETER));
+        console2.log("STORE : ",address(STORE));
+        console2.log("EXPRESSION_DEPLOYER : ",address(EXPRESSION_DEPLOYER));
+        console2.log("ORDERBOOK_SUPARSER : ",address(ORDERBOOK_SUPARSER)); 
+
+        bytes memory rainlang = "_: decimal18-saturating-sub(1e18 2e18);";
+        PARSER.parse(
+            rainlang
         );
     }
 }
