@@ -40,13 +40,23 @@ contract TrancheMirrorUtils is RainContracts, Test {
 
     function setUp() public {
         selectPolygonFork();
-        PARSER = IParserV1(0xc2D7890077F3EA75c2798D8624E1E0E6ef8C41e6);
-        INTERPRETER = IInterpreterV2(0xB7d691B7E3676cb70dB0cDae95797F24Eab6980D);
-        STORE = IInterpreterStoreV2(0x0b5a2b0aCFc5B52bf341FAD638B63C9A6f82dcb9);
-        EXPRESSION_DEPLOYER = IExpressionDeployerV3(0xE1E250a234aF6F343062873bf89c9D1a0a659c0b);
+
+        deployParser();
+        deployStore();
+        deployInterpreter();
+
+        deployExpressionDeployer(vm, address(INTERPRETER), address(STORE), address(PARSER));
+        deployOrderBookSubparser();
+        deployUniswapWords(vm); 
+        
+        // PARSER = IParserV1(0xc2D7890077F3EA75c2798D8624E1E0E6ef8C41e6);
+        // INTERPRETER = IInterpreterV2(0xB7d691B7E3676cb70dB0cDae95797F24Eab6980D);
+        // STORE = IInterpreterStoreV2(0x0b5a2b0aCFc5B52bf341FAD638B63C9A6f82dcb9);
+        // EXPRESSION_DEPLOYER = IExpressionDeployerV3(0xE1E250a234aF6F343062873bf89c9D1a0a659c0b);
+        // ORDERBOOK_SUPARSER = ISubParserV2(0x8A99456dD0E1CaA187CF6B779cA42EFE94E9C42b);
+        // UNISWAP_WORDS = ISubParserV2(0xd97e8e581393055521F813D6889CfcCEDF7847C6); 
+
         ORDERBOOK = IOrderBookV3(0xDE5aBE2837bc042397D80E37fb7b2C850a8d5a6C);
-        ORDERBOOK_SUPARSER = ISubParserV2(0x8A99456dD0E1CaA187CF6B779cA42EFE94E9C42b);
-        UNISWAP_WORDS = ISubParserV2(0xd97e8e581393055521F813D6889CfcCEDF7847C6);
         ARB_IMPLEMENTATION = IOrderBookV3ArbOrderTaker(0x8F29083140559bd1771eDBfB73656A9f676c00Fd);
         ARB_INSTANCE = IOrderBookV3ArbOrderTaker(0x0D7896d70FE84e88CC8e8BaDcB14D612Eee4Bbe0);
         CLONE_FACTORY = ICloneableFactoryV2(0x6d0c39093C21dA1230aCDD911420BBfA353A3FBA);
