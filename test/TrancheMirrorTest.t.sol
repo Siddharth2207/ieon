@@ -31,7 +31,7 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
         console2.log("EXPRESSION_DEPLOYER : ",address(EXPRESSION_DEPLOYER));
         console2.log("ORDERBOOK_SUPARSER : ",address(ORDERBOOK_SUPARSER)); 
 
-        bytes memory rainlang = "_: decimal18-saturating-sub(1e18 2e18);";
+        bytes memory rainlang = "_: decimal18-saturating-sub(2 2);";
         PARSER.parse(
             rainlang
         );
