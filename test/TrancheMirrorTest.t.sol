@@ -7,34 +7,46 @@ import "test/util/TrancheMirrorUtils.sol";
 import "src/TrancheMirror.sol";
 
 contract TrancheMirrorTest is TrancheMirrorUtils {
-    
-    function testParseOrder() public {
-        console2.log("PARSER : ",address(PARSER));
-        console2.log("INTERPRETER : ",address(INTERPRETER));
-        console2.log("STORE : ",address(STORE));
-        console2.log("EXPRESSION_DEPLOYER : ",address(EXPRESSION_DEPLOYER));
-        console2.log("ORDERBOOK_SUPARSER : ",address(ORDERBOOK_SUPARSER)); 
+
+    function test_trancheModelling() public {
+        string memory file = "./test/csvs/tranche-space.csv";
+        if (vm.exists(file)) vm.removeFile(file);
+
+        FullyQualifiedNamespace namespace =
+            LibNamespace.qualifyNamespace(StateNamespace.wrap(uint256(uint160(ORDER_OWNER))), address(ORDERBOOK));
+
+        uint256[][] memory buyOrderContext = getBuyOrderContext(11223344);
 
 
-        PARSER.parse(
-            LibTrancheSpreadOrders.getTrancheSpreadBuyOrder(
-                vm,
-                address(ORDERBOOK_SUPARSER)
-            )
-        );
-    }
+        for (uint256 i = 0; i < 200; i++) {
+            uint256 trancheSpace = uint256(1e17 * i); 
+            
+            address expression;
+            {
+                (bytes memory bytecode, uint256[] memory constants) = PARSER.parse(
+                    LibTrancheSpreadOrders.getTrancheSpreadOrder(
+                        vm, 
+                        address(ORDERBOOK_SUPARSER),
+                        trancheSpace,
+                        101e16
+                    )
+                );
+                (,, expression,) = EXPRESSION_DEPLOYER.deployExpression2(bytecode, constants); 
+            }
 
-    function testParseOrderRainlang() public {
-        console2.log("PARSER : ",address(PARSER));
-        console2.log("INTERPRETER : ",address(INTERPRETER));
-        console2.log("STORE : ",address(STORE));
-        console2.log("EXPRESSION_DEPLOYER : ",address(EXPRESSION_DEPLOYER));
-        console2.log("ORDERBOOK_SUPARSER : ",address(ORDERBOOK_SUPARSER)); 
+            (uint256[] memory buyStack,) = IInterpreterV2(INTERPRETER).eval2(
+                IInterpreterStoreV1(address(STORE)),
+                namespace,
+                LibEncodedDispatch.encode2(expression, SourceIndexV2.wrap(0), type(uint32).max),
+                buyOrderContext,
+                new uint256[](0)
+            );
 
-        bytes memory rainlang = "_: decimal18-saturating-sub(2 2);";
-        PARSER.parse(
-            rainlang
-        );
+            string memory line = string.concat(uint2str(trancheSpace), ",", uint2str(buyStack[1]), ",", uint2str(buyStack[0]));
+
+            vm.writeLine(file, line);
+
+        }
     }
 }
 

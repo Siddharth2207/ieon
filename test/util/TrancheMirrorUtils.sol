@@ -62,4 +62,99 @@ contract TrancheMirrorUtils is RainContracts, Test {
         CLONE_FACTORY = ICloneableFactoryV2(0x6d0c39093C21dA1230aCDD911420BBfA353A3FBA); 
     }
 
+    function getSellOrderContext(uint256 orderHash) internal view returns (uint256[][] memory context) {
+        // Sell Order Context
+        context = new uint256[][](5);
+        {
+            {
+                uint256[] memory baseContext = new uint256[](2);
+                context[0] = baseContext;
+            }
+            {
+                uint256[] memory callingContext = new uint256[](3);
+                // order hash
+                callingContext[0] = orderHash;
+                // owner
+                callingContext[1] = uint256(uint160(address(ORDER_OWNER)));
+                // counterparty
+                callingContext[2] = uint256(uint160(address(ORDERBOOK)));
+                context[1] = callingContext;
+            }
+            {
+                uint256[] memory calculationsContext = new uint256[](0);
+                context[2] = calculationsContext;
+            }
+            {
+                uint256[] memory inputsContext = new uint256[](CONTEXT_VAULT_IO_ROWS);
+                inputsContext[0] = uint256(uint160(address(WETH_TOKEN)));
+                inputsContext[1] = 18;
+                context[3] = inputsContext;
+            }
+            {
+                uint256[] memory outputsContext = new uint256[](CONTEXT_VAULT_IO_ROWS);
+                outputsContext[0] = uint256(uint160(address(IEON_TOKEN)));
+                outputsContext[1] = 18;
+                context[4] = outputsContext;
+            }
+        }
+    }
+
+    function getBuyOrderContext(uint256 orderHash) internal view returns (uint256[][] memory context) {
+        // Buy Order Context
+        context = new uint256[][](5);
+        {
+            {
+                uint256[] memory baseContext = new uint256[](2);
+                context[0] = baseContext;
+            }
+            {
+                uint256[] memory callingContext = new uint256[](3);
+                // order hash
+                callingContext[0] = orderHash;
+                // owner
+                callingContext[1] = uint256(uint160(address(ORDERBOOK)));
+                // counterparty
+                callingContext[2] = uint256(uint160(address(ARB_INSTANCE)));
+                context[1] = callingContext;
+            }
+            {
+                uint256[] memory calculationsContext = new uint256[](0);
+                context[2] = calculationsContext;
+            }
+            {
+                uint256[] memory inputsContext = new uint256[](CONTEXT_VAULT_IO_ROWS);
+                inputsContext[0] = uint256(uint160(address(IEON_TOKEN)));
+                inputsContext[1] = 18;
+                context[3] = inputsContext;
+            }
+            {
+                uint256[] memory outputsContext = new uint256[](CONTEXT_VAULT_IO_ROWS);
+                outputsContext[0] = uint256(uint160(address(WETH_TOKEN)));
+                outputsContext[1] = 18;
+                context[4] = outputsContext;
+            }
+        }
+    }
+
+    function eval(bytes memory rainlang, uint256[][] memory context) public returns (uint256[] memory) {
+        (bytes memory bytecode, uint256[] memory constants) = PARSER.parse(rainlang);
+        (,, address expression,) = EXPRESSION_DEPLOYER.deployExpression2(bytecode, constants);
+        return evalDeployedExpression(expression, ORDER_HASH, context);
+    }
+
+    function evalDeployedExpression(address expression, bytes32 orderHash, uint256[][] memory context) public view returns (uint256[] memory) {
+
+        FullyQualifiedNamespace namespace =
+            LibNamespace.qualifyNamespace(StateNamespace.wrap(uint256(uint160(ORDER_OWNER))), address(ORDERBOOK));
+
+        (uint256[] memory stack,) = IInterpreterV2(INTERPRETER).eval2(
+            IInterpreterStoreV1(address(STORE)),
+            namespace,
+            LibEncodedDispatch.encode2(expression, SourceIndexV2.wrap(0), type(uint16).max),
+            context,
+            new uint256[](0)
+        );
+        return stack;
+    }
+
 }

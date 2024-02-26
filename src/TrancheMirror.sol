@@ -68,15 +68,19 @@ function uint2str(uint256 _i) pure returns (string memory _uintAsString) {
     }
     return string(bstr);
 }
-
 library LibTrancheSpreadOrders {
-    using Strings for address;
+    using Strings for address;//100 000000000000000000 //909909909909909909
 
-    function getTrancheSpreadBuyOrder(Vm vm, address orderBookSubparser)
+    function getTrancheSpreadOrder(
+        Vm vm,
+        address orderBookSubparser,
+        uint256 testTrancheSpace,
+        uint256 spreadRatio
+    )
         internal
         returns (bytes memory trancheRefill)
     {
-        string[] memory ffi = new string[](29);
+        string[] memory ffi = new string[](31);
         ffi[0] = "rain";
         ffi[1] = "dotrain";
         ffi[2] = "compose";
@@ -91,21 +95,23 @@ library LibTrancheSpreadOrders {
         ffi[11] = "--bind";
         ffi[12] = "reserve-token=0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
         ffi[13] = "--bind";
-        ffi[14] = "get-tranche-space='get-real-tranche-space";
+        ffi[14] = "get-tranche-space='get-test-tranche-space";
         ffi[15] = "--bind";
-        ffi[16] = "set-tranche-space='set-real-tranche-space";
+        ffi[16] = "set-tranche-space='set-test-tranche-space";
         ffi[17] = "--bind";
-        ffi[18] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
+        ffi[18] = string.concat("test-tranche-space=", uint2str(testTrancheSpace));
         ffi[19] = "--bind";
-        ffi[20] = string.concat("tranche-reserve-amount-base=", uint2str(1e18));
+        ffi[20] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
         ffi[21] = "--bind";
-        ffi[22] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
+        ffi[22] = string.concat("tranche-reserve-amount-base=", uint2str(100e18));
         ffi[23] = "--bind";
-        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(111e16));
+        ffi[24] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
         ffi[25] = "--bind";
-        ffi[26] = string.concat("spread-ratio=", uint2str(101e16));
+        ffi[26] = string.concat("tranche-reserve-io-ratio-base=", uint2str(111e16));
         ffi[27] = "--bind";
-        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
+        ffi[28] = string.concat("spread-ratio=", uint2str(spreadRatio));
+        ffi[29] = "--bind";
+        ffi[30] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));
