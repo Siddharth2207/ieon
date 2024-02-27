@@ -26,6 +26,8 @@ address constant POLYGON_USDT_HOLDER = 0xF977814e90dA44bFA03b6295A0616a897441ace
 // Wrapped native token holder.
 address constant POLYGON_WETH_HOLDER = 0x8C81A2c64Bf001b03AfB3c513a7be223Ba23de1B;
 
+address constant POLYGON_IEON_ADMIN = 0x3a7bD65AB95678eB2A3a8d37962E89f42a6968c7;
+
 
 /// @dev https://polygonscan.com/address/0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32
 address constant UNI_V2_FACTORY = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
@@ -164,7 +166,7 @@ library LibTrancheSpreadOrders {
         ffi[27] = "--bind";
         ffi[28] = string.concat("spread-ratio=", uint2str(spreadRatio));
         ffi[29] = "--bind";
-        ffi[30] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
+        ffi[30] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e10));
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));
@@ -198,15 +200,15 @@ library LibTrancheSpreadOrders {
         ffi[17] = "--bind";
         ffi[18] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
         ffi[19] = "--bind";
-        ffi[20] = string.concat("tranche-reserve-amount-base=", uint2str(100e18));
+        ffi[20] = string.concat("tranche-reserve-amount-base=", uint2str(1000e18));
         ffi[21] = "--bind";
         ffi[22] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
         ffi[23] = "--bind";
-        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(111e16));
+        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(326e18));
         ffi[25] = "--bind";
-        ffi[26] = string.concat("spread-ratio=", uint2str(101e16));
+        ffi[26] = string.concat("spread-ratio=", uint2str(99999999999999999));
         ffi[27] = "--bind";
-        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
+        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(2e17));
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));

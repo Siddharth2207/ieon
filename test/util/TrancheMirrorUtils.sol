@@ -21,11 +21,11 @@ contract TrancheMirrorUtils is RainContracts, Test {
     using LibFixedPointDecimalArithmeticOpenZeppelin for uint256;
     using LibFixedPointDecimalScale for uint256;
 
-    uint256 constant FORK_BLOCK_NUMBER = 54005438;
+    uint256 constant FORK_BLOCK_NUMBER = 54013718;
     uint256 constant CONTEXT_VAULT_IO_ROWS = 5;
 
     function selectPolygonFork() internal {
-        uint256 fork = vm.createFork("https://1rpc.io/matic");
+        uint256 fork = vm.createFork(vm.envString("RPC_URL_POLYGON"));
         vm.selectFork(fork);
         vm.rollFork(FORK_BLOCK_NUMBER);
     }
