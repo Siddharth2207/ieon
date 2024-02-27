@@ -23,6 +23,9 @@ uint256 constant VAULT_ID = uint256(keccak256("vault"));
 address constant POLYGON_IEON_HOLDER = 0xd6756f5aF54486Abda6bd9b1eee4aB0dBa7C3ef2;
 // USDT token holder.
 address constant POLYGON_USDT_HOLDER = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+// Wrapped native token holder.
+address constant POLYGON_WETH_HOLDER = 0x8C81A2c64Bf001b03AfB3c513a7be223Ba23de1B;
+
 
 /// @dev https://polygonscan.com/address/0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32
 address constant UNI_V2_FACTORY = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
@@ -38,6 +41,56 @@ IERC20 constant WETH_TOKEN = IERC20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
 
 /// @dev https://docs.sushi.com/docs/Products/Classic%20AMM/Deployment%20Addresses
 address constant POLYGON_SUSHI_V2_ROUTER = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
+
+bytes constant SELL_ROUTE =
+    //offset 
+    hex"0000000000000000000000000000000000000000000000000000000000000020"
+    //stream length
+    hex"0000000000000000000000000000000000000000000000000000000000000042"
+    //command 2 = processUserERC20
+    hex"02"
+    //token address
+    hex"d0e9c8f5fae381459cf07ec506c1d2896e8b5df6"
+    //number of pools
+    hex"01"
+    // pool share
+    hex"ffff"
+    // pool type
+    hex"00"
+    // pool address
+    hex"316bc12871c807020ef8c1bc7771061c4e7a04ed"
+    // direction 1
+    hex"00"
+    // to
+    hex"0D7896d70FE84e88CC8e8BaDcB14D612Eee4Bbe0"
+    // padding
+    hex"000000000000000000000000000000000000000000000000000000000000";
+
+bytes constant BUY_ROUTE =
+    //offset 
+    hex"0000000000000000000000000000000000000000000000000000000000000020"
+    //stream length
+    hex"0000000000000000000000000000000000000000000000000000000000000042"
+    //command 2 = processUserERC20
+    hex"02"
+    //token address
+    hex"0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
+    //number of pools
+    hex"01"
+    // pool share
+    hex"ffff"
+    // pool type
+    hex"00"
+    // pool address
+    hex"316bc12871c807020ef8c1bc7771061c4e7a04ed"
+    // direction 1
+    hex"01"
+    // to
+    hex"0D7896d70FE84e88CC8e8BaDcB14D612Eee4Bbe0"
+    // padding
+    hex"000000000000000000000000000000000000000000000000000000000000";
+
+
 
 function polygonIeonIo() pure returns (IO memory) {
     return IO(address(IEON_TOKEN), 18, VAULT_ID);
@@ -69,9 +122,9 @@ function uint2str(uint256 _i) pure returns (string memory _uintAsString) {
     return string(bstr);
 }
 library LibTrancheSpreadOrders {
-    using Strings for address;//100 000000000000000000 //909909909909909909
+    using Strings for address;
 
-    function getTrancheSpreadOrder(
+    function getTrancheTestSpreadOrder(
         Vm vm,
         address orderBookSubparser,
         uint256 testTrancheSpace,
@@ -112,6 +165,48 @@ library LibTrancheSpreadOrders {
         ffi[28] = string.concat("spread-ratio=", uint2str(spreadRatio));
         ffi[29] = "--bind";
         ffi[30] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
+        
+        
+        trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));
+    }
+
+    function getTrancheSpreadOrder(
+        Vm vm,
+        address orderBookSubparser
+    )
+        internal
+        returns (bytes memory trancheRefill)
+    {
+        string[] memory ffi = new string[](29);
+        ffi[0] = "rain";
+        ffi[1] = "dotrain";
+        ffi[2] = "compose";
+        ffi[3] = "-i";
+        ffi[4] = "lib/h20.pubstrats/src/tranche-spread.rain";
+        ffi[5] = "--entrypoint";
+        ffi[6] = "calculate-io";
+        ffi[7] = "--entrypoint";
+        ffi[8] = "handle-io";
+        ffi[9] = "--bind";
+        ffi[10] = "distribution-token=0xd0e9c8f5Fae381459cf07Ec506C1d2896E8b5df6";
+        ffi[11] = "--bind";
+        ffi[12] = "reserve-token=0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
+        ffi[13] = "--bind";
+        ffi[14] = "get-tranche-space='get-real-tranche-space";
+        ffi[15] = "--bind";
+        ffi[16] = "set-tranche-space='set-real-tranche-space";
+        ffi[17] = "--bind";
+        ffi[18] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
+        ffi[19] = "--bind";
+        ffi[20] = string.concat("tranche-reserve-amount-base=", uint2str(100e18));
+        ffi[21] = "--bind";
+        ffi[22] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
+        ffi[23] = "--bind";
+        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(111e16));
+        ffi[25] = "--bind";
+        ffi[26] = string.concat("spread-ratio=", uint2str(101e16));
+        ffi[27] = "--bind";
+        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e16));
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));

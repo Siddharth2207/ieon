@@ -98,13 +98,13 @@
       
     ],
     "marks": [{
-      "type": "symbol",
+      "type": "line",
       "from": {"data": "tranche-space"},
       "encode": {
         "enter": {
           "x": {"type": "quantitative","scale": "x", "field": "trancheSpaceScaled"},
           "y": {"type": "quantitative","scale": "y", "field": "amountScaled"},
-          "fill": {"value": "steelblue"},
+          
           "angle": {"value": 45},
           "shape": {"value": "cross"},
           "size": {"value": 30}
