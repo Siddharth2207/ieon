@@ -25,7 +25,7 @@ contract TrancheMirrorUtils is RainContracts, Test {
     uint256 constant CONTEXT_VAULT_IO_ROWS = 5;
 
     function selectPolygonFork() internal {
-        uint256 fork = vm.createFork(vm.envString("RPC_URL_POLYGON"));
+        uint256 fork = vm.createFork("https://1rpc.io/matic");
         vm.selectFork(fork);
         vm.rollFork(FORK_BLOCK_NUMBER);
     }
