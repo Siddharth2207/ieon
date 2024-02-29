@@ -21,7 +21,7 @@ contract TrancheMirrorUtils is RainContracts, Test {
     using LibFixedPointDecimalArithmeticOpenZeppelin for uint256;
     using LibFixedPointDecimalScale for uint256;
 
-    uint256 constant FORK_BLOCK_NUMBER = 54013718;
+    uint256 constant FORK_BLOCK_NUMBER = 54062608;
     uint256 constant CONTEXT_VAULT_IO_ROWS = 5;
 
     function selectPolygonFork() internal {

@@ -24,7 +24,7 @@ address constant POLYGON_IEON_HOLDER = 0xd6756f5aF54486Abda6bd9b1eee4aB0dBa7C3ef
 // USDT token holder.
 address constant POLYGON_USDT_HOLDER = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
 // Wrapped native token holder.
-address constant POLYGON_WETH_HOLDER = 0x8C81A2c64Bf001b03AfB3c513a7be223Ba23de1B;
+address constant POLYGON_WETH_HOLDER = 0xbAd24a42b621eED9033409736219c01bF0d8500F;
 
 address constant POLYGON_IEON_ADMIN = 0x3a7bD65AB95678eB2A3a8d37962E89f42a6968c7;
 
@@ -204,9 +204,9 @@ library LibTrancheSpreadOrders {
         ffi[21] = "--bind";
         ffi[22] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
         ffi[23] = "--bind";
-        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(326e18));
+        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(327e18));
         ffi[25] = "--bind";
-        ffi[26] = string.concat("spread-ratio=", uint2str(99999999999999999));
+        ffi[26] = string.concat("spread-ratio=", uint2str(101e16));
         ffi[27] = "--bind";
         ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(2e17));
         
