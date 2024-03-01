@@ -21,7 +21,7 @@ contract TrancheMirrorUtils is RainContracts, Test {
     using LibFixedPointDecimalArithmeticOpenZeppelin for uint256;
     using LibFixedPointDecimalScale for uint256;
 
-    uint256 constant FORK_BLOCK_NUMBER = 54062608;
+    uint256 constant FORK_BLOCK_NUMBER = 54140734;
     uint256 constant CONTEXT_VAULT_IO_ROWS = 5;
 
     function selectPolygonFork() internal {
@@ -41,20 +41,11 @@ contract TrancheMirrorUtils is RainContracts, Test {
     function setUp() public {
         selectPolygonFork();
 
-        deployParser();
-        deployStore();
-        deployInterpreter();
-
-        deployExpressionDeployer(vm, address(INTERPRETER), address(STORE), address(PARSER));
-        deployOrderBookSubparser();
-        deployUniswapWords(vm);
-         
-        // PARSER = IParserV1(0xc2D7890077F3EA75c2798D8624E1E0E6ef8C41e6);
-        // INTERPRETER = IInterpreterV2(0xB7d691B7E3676cb70dB0cDae95797F24Eab6980D);
-        // STORE = IInterpreterStoreV2(0x0b5a2b0aCFc5B52bf341FAD638B63C9A6f82dcb9);
-        // EXPRESSION_DEPLOYER = IExpressionDeployerV3(0xE1E250a234aF6F343062873bf89c9D1a0a659c0b);
-        // ORDERBOOK_SUPARSER = ISubParserV2(0x8A99456dD0E1CaA187CF6B779cA42EFE94E9C42b);
-        // UNISWAP_WORDS = ISubParserV2(0xd97e8e581393055521F813D6889CfcCEDF7847C6); 
+        PARSER = IParserV1(0xbe7eF1c2E86cd36642Be685715a089ecc1a15f5C);
+        STORE = IInterpreterStoreV2(0xCCe6D0653B6DAC3B5fAd3F2A8E47cCE537126aD0);
+        INTERPRETER = IInterpreterV2(0x8bb0e1Ade233f386668f6e3c11762f18bF8293b3);
+        EXPRESSION_DEPLOYER = IExpressionDeployerV3(0xB16bbF12ECE3414af72F660aB63F4dDa1D7250FA);
+        ORDERBOOK_SUPARSER = ISubParserV2(0x14c5D39dE54D498aFD3C803D3B5c88bbEcadcc48);
 
         ORDERBOOK = IOrderBookV3(0xDE5aBE2837bc042397D80E37fb7b2C850a8d5a6C);
         ARB_IMPLEMENTATION = IOrderBookV3ArbOrderTaker(0x8F29083140559bd1771eDBfB73656A9f676c00Fd);

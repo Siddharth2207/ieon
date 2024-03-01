@@ -12,7 +12,16 @@ import {
     TakeOrderConfigV2,
     TakeOrdersConfigV2
 } from "rain.orderbook/src/interface/unstable/IOrderBookV3.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol"; 
+import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+
+// Strategy Params
+uint256 constant TRANCHE_RESERVE_BASE_AMOUNT = 1000e18 ;
+uint256 constant TRANCHE_RESERVE_BASE_IO_RATIO = 242e18;
+uint256 constant SPREAD_RATIO = 101e16;
+uint256 constant TRANCHE_EDGE_THRESHOLD = 2e17;
+uint256 constant INITIAL_TRANCHE_SPACE = 0;
+uint256 constant TRANCHE_SPACE_SNAP_THRESHOLD = 1e12;
+
 
 /// @dev https://polygonscan.com/address/0x0a6e511Fe663827b9cA7e2D2542b20B37fC217A6
 IRouteProcessor constant ROUTE_PROCESSOR = IRouteProcessor(address(0x0a6e511Fe663827b9cA7e2D2542b20B37fC217A6));
@@ -93,7 +102,6 @@ bytes constant BUY_ROUTE =
     hex"000000000000000000000000000000000000000000000000000000000000";
 
 
-
 function polygonIeonIo() pure returns (IO memory) {
     return IO(address(IEON_TOKEN), 18, VAULT_ID);
 }
@@ -102,29 +110,10 @@ function polygonWethIo() pure returns (IO memory) {
     return IO(address(WETH_TOKEN), 18, VAULT_ID);
 }
 
-function uint2str(uint256 _i) pure returns (string memory _uintAsString) {
-    if (_i == 0) {
-        return "0";
-    }
-    uint256 j = _i;
-    uint256 len;
-    while (j != 0) {
-        len++;
-        j /= 10;
-    }
-    bytes memory bstr = new bytes(len);
-    uint256 k = len;
-    while (_i != 0) {
-        k = k - 1;
-        uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-        bytes1 b1 = bytes1(temp);
-        bstr[k] = b1;
-        _i /= 10;
-    }
-    return string(bstr);
-}
 library LibTrancheSpreadOrders {
     using Strings for address;
+    using Strings for uint256;
+
 
     function getTrancheTestSpreadOrder(
         Vm vm,
@@ -135,7 +124,7 @@ library LibTrancheSpreadOrders {
         internal
         returns (bytes memory trancheRefill)
     {
-        string[] memory ffi = new string[](31);
+        string[] memory ffi = new string[](35);
         ffi[0] = "rain";
         ffi[1] = "dotrain";
         ffi[2] = "compose";
@@ -154,19 +143,23 @@ library LibTrancheSpreadOrders {
         ffi[15] = "--bind";
         ffi[16] = "set-tranche-space='set-test-tranche-space";
         ffi[17] = "--bind";
-        ffi[18] = string.concat("test-tranche-space=", uint2str(testTrancheSpace));
+        ffi[18] = string.concat("test-tranche-space=", testTrancheSpace.toString());
         ffi[19] = "--bind";
         ffi[20] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
         ffi[21] = "--bind";
-        ffi[22] = string.concat("tranche-reserve-amount-base=", uint2str(100e18));
+        ffi[22] = string.concat("tranche-reserve-amount-base=", TRANCHE_RESERVE_BASE_AMOUNT.toString());
         ffi[23] = "--bind";
         ffi[24] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
         ffi[25] = "--bind";
-        ffi[26] = string.concat("tranche-reserve-io-ratio-base=", uint2str(111e16));
+        ffi[26] = string.concat("tranche-reserve-io-ratio-base=", TRANCHE_RESERVE_BASE_IO_RATIO.toString());
         ffi[27] = "--bind";
-        ffi[28] = string.concat("spread-ratio=", uint2str(spreadRatio));
+        ffi[28] = string.concat("spread-ratio=", spreadRatio.toString());
         ffi[29] = "--bind";
-        ffi[30] = string.concat("tranche-space-edge-guard-threshold=", uint2str(1e10));
+        ffi[30] = string.concat("tranche-space-edge-guard-threshold=", TRANCHE_EDGE_THRESHOLD.toString());
+        ffi[31] = "--bind";
+        ffi[32] = string.concat("initial-tranche-space=", INITIAL_TRANCHE_SPACE.toString());
+        ffi[33] = "--bind";
+        ffi[34] = string.concat("tranche-space-snap-threshold=", TRANCHE_SPACE_SNAP_THRESHOLD.toString());
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));
@@ -179,7 +172,7 @@ library LibTrancheSpreadOrders {
         internal
         returns (bytes memory trancheRefill)
     {
-        string[] memory ffi = new string[](29);
+        string[] memory ffi = new string[](33);
         ffi[0] = "rain";
         ffi[1] = "dotrain";
         ffi[2] = "compose";
@@ -200,15 +193,19 @@ library LibTrancheSpreadOrders {
         ffi[17] = "--bind";
         ffi[18] = "tranche-reserve-amount-growth='tranche-reserve-amount-growth-constant";
         ffi[19] = "--bind";
-        ffi[20] = string.concat("tranche-reserve-amount-base=", uint2str(1000e18));
+        ffi[20] = string.concat("tranche-reserve-amount-base=", TRANCHE_RESERVE_BASE_AMOUNT.toString());
         ffi[21] = "--bind";
         ffi[22] = "tranche-reserve-io-ratio-growth='tranche-reserve-io-ratio-linear";
         ffi[23] = "--bind";
-        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", uint2str(327e18));
+        ffi[24] = string.concat("tranche-reserve-io-ratio-base=", TRANCHE_RESERVE_BASE_IO_RATIO.toString());
         ffi[25] = "--bind";
-        ffi[26] = string.concat("spread-ratio=", uint2str(101e16));
+        ffi[26] = string.concat("spread-ratio=", SPREAD_RATIO.toString());
         ffi[27] = "--bind";
-        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", uint2str(2e17));
+        ffi[28] = string.concat("tranche-space-edge-guard-threshold=", TRANCHE_EDGE_THRESHOLD.toString());
+        ffi[29] = "--bind";
+        ffi[30] = string.concat("initial-tranche-space=", INITIAL_TRANCHE_SPACE.toString());
+        ffi[31] = "--bind";
+        ffi[32] = string.concat("tranche-space-snap-threshold=", TRANCHE_SPACE_SNAP_THRESHOLD.toString());
         
         
         trancheRefill = bytes.concat(getSubparserPrelude(orderBookSubparser), vm.ffi(ffi));

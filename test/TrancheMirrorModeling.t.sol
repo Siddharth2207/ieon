@@ -5,8 +5,10 @@ import {Vm} from "forge-std/Vm.sol";
 import {console2, Test} from "forge-std/Test.sol";
 import "test/util/TrancheMirrorUtils.sol";
 import "src/TrancheMirror.sol";
+import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract TrancheMirrorTest is TrancheMirrorUtils {
+    using Strings for uint256;
 
     function test_trancheModelling() public {
         string memory file = "./test/csvs/tranche-space.csv";
@@ -42,7 +44,7 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
                 new uint256[](0)
             );
 
-            string memory line = string.concat(uint2str(trancheSpace), ",", uint2str(buyStack[1]), ",", uint2str(buyStack[0]));
+            string memory line = string.concat(trancheSpace.toString(), ",", buyStack[1].toString(), ",", buyStack[0].toString());
 
             vm.writeLine(file, line);
 
