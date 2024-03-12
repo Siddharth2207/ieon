@@ -21,7 +21,7 @@ contract TrancheMirrorUtils is RainContracts, Test {
     using LibFixedPointDecimalArithmeticOpenZeppelin for uint256;
     using LibFixedPointDecimalScale for uint256;
 
-    uint256 constant FORK_BLOCK_NUMBER = 54140734;
+    uint256 constant FORK_BLOCK_NUMBER = 54561421;
     uint256 constant CONTEXT_VAULT_IO_ROWS = 5;
 
     function selectPolygonFork() internal {
@@ -135,6 +135,7 @@ contract TrancheMirrorUtils is RainContracts, Test {
 
     function evalDeployedExpression(address expression, bytes32 orderHash, uint256[][] memory context) public view returns (uint256[] memory) {
 
+        (orderHash);
         FullyQualifiedNamespace namespace =
             LibNamespace.qualifyNamespace(StateNamespace.wrap(uint256(uint160(ORDER_OWNER))), address(ORDERBOOK));
 

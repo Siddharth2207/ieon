@@ -16,7 +16,7 @@ import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
 // Strategy Params
 uint256 constant TRANCHE_RESERVE_BASE_AMOUNT = 1000e18 ;
-uint256 constant TRANCHE_RESERVE_BASE_IO_RATIO = 242e18;
+uint256 constant TRANCHE_RESERVE_BASE_IO_RATIO = 315e18;
 uint256 constant SPREAD_RATIO = 101e16;
 uint256 constant TRANCHE_EDGE_THRESHOLD = 2e17;
 uint256 constant INITIAL_TRANCHE_SPACE = 0;

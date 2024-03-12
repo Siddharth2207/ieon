@@ -15,9 +15,10 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
     using LibFixedPointDecimalArithmeticOpenZeppelin for uint256;
     using LibFixedPointDecimalScale for uint256;
 
-    using SafeERC20 for IERC20; 
+    using SafeERC20 for IERC20;
 
     function testSellBuyOrderHappyFork() public { 
+
         // Deposit Tokens
         {
             uint256 depositAmount = 400000e18;
@@ -39,12 +40,11 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
                         vm, 
                         address(ORDERBOOK_SUPARSER)
                     )
-            ); 
+            );
             trancheOrder = placeOrder(ORDER_OWNER, bytecode, constants, tokenVaults, tokenVaults);
         }
-        // Take Order
-        {       
-            // Move external market so the order clears
+        // Take Sell Order
+        {   
             moveExternalPrice(
                 address(WETH_TOKEN),
                 address(IEON_TOKEN),
@@ -58,6 +58,23 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
             Vm.Log[] memory entries = vm.getRecordedLogs();
             (,distributorTokenOut) = getContextInputOutput(entries);
         }
+        // Take Buy Order
+        {       
+            // Move external market so the order clears
+            moveExternalPrice(
+                address(IEON_TOKEN),
+                address(WETH_TOKEN),
+                POLYGON_IEON_HOLDER,
+                10000000e18,
+                SELL_ROUTE
+            );
+            vm.recordLogs();
+            takeOrder(trancheOrder, BUY_ROUTE,0,1);
+
+            Vm.Log[] memory entries = vm.getRecordedLogs();
+            (distributorTokenIn,) = getContextInputOutput(entries);
+        }
+        assertGe(distributorTokenIn,distributorTokenOut);
     }
 
     function giveTestAccountsTokens(IERC20 token, address from, address to, uint256 amount) internal {
@@ -136,7 +153,7 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
         vm.stopPrank();
     } 
 
-    function getContextInputOutput(Vm.Log[] memory entries) public returns(uint256 input, uint256 output){
+    function getContextInputOutput(Vm.Log[] memory entries) internal pure returns(uint256 input, uint256 output){
         for (uint256 j = 0; j < entries.length; j++) {
             if (entries[j].topics[0] == keccak256("Context(address,uint256[][])")) {
                 (, uint256[][] memory context) = abi.decode(entries[j].data, (address, uint256[][]));
