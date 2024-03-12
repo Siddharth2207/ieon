@@ -50,10 +50,10 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
                 address(IEON_TOKEN),
                 POLYGON_WETH_HOLDER,
                 1000e18,
-                BUY_ROUTE
+                getUniV3TradeBuyRoute(address(ARB_INSTANCE))
             );
             vm.recordLogs();
-            takeOrder(trancheOrder, SELL_ROUTE,1,0);
+            takeOrder(trancheOrder, getUniV3TradeSellRoute(address(ARB_INSTANCE)),1,0);
 
             Vm.Log[] memory entries = vm.getRecordedLogs();
             (,distributorTokenOut) = getContextInputOutput(entries);
@@ -66,10 +66,10 @@ contract TrancheMirrorTest is TrancheMirrorUtils {
                 address(WETH_TOKEN),
                 POLYGON_IEON_HOLDER,
                 10000000e18,
-                SELL_ROUTE
+                getUniV3TradeSellRoute(address(ARB_INSTANCE))
             );
             vm.recordLogs();
-            takeOrder(trancheOrder, BUY_ROUTE,0,1);
+            takeOrder(trancheOrder, getUniV3TradeBuyRoute(address(ARB_INSTANCE)),0,1);
 
             Vm.Log[] memory entries = vm.getRecordedLogs();
             (distributorTokenIn,) = getContextInputOutput(entries);

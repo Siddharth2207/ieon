@@ -23,8 +23,8 @@ uint256 constant INITIAL_TRANCHE_SPACE = 0;
 uint256 constant TRANCHE_SPACE_SNAP_THRESHOLD = 1e12;
 
 
-/// @dev https://polygonscan.com/address/0x0a6e511Fe663827b9cA7e2D2542b20B37fC217A6
-IRouteProcessor constant ROUTE_PROCESSOR = IRouteProcessor(address(0x0a6e511Fe663827b9cA7e2D2542b20B37fC217A6));
+/// @dev https://polygonscan.com/address/0xE7eb31f23A5BefEEFf76dbD2ED6AdC822568a5d2
+IRouteProcessor constant ROUTE_PROCESSOR = IRouteProcessor(address(0xE7eb31f23A5BefEEFf76dbD2ED6AdC822568a5d2));
 
 uint256 constant VAULT_ID = uint256(keccak256("vault"));
 
@@ -53,54 +53,17 @@ IERC20 constant WETH_TOKEN = IERC20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
 /// @dev https://docs.sushi.com/docs/Products/Classic%20AMM/Deployment%20Addresses
 address constant POLYGON_SUSHI_V2_ROUTER = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
 
-bytes constant SELL_ROUTE =
-    //offset 
-    hex"0000000000000000000000000000000000000000000000000000000000000020"
-    //stream length
-    hex"0000000000000000000000000000000000000000000000000000000000000042"
-    //command 2 = processUserERC20
-    hex"02"
-    //token address
-    hex"d0e9c8f5fae381459cf07ec506c1d2896e8b5df6"
-    //number of pools
-    hex"01"
-    // pool share
-    hex"ffff"
-    // pool type
-    hex"00"
-    // pool address
-    hex"316bc12871c807020ef8c1bc7771061c4e7a04ed"
-    // direction 1
-    hex"00"
-    // to
-    hex"0D7896d70FE84e88CC8e8BaDcB14D612Eee4Bbe0"
-    // padding
-    hex"000000000000000000000000000000000000000000000000000000000000";
+function getUniV3TradeSellRoute(address toAddress) pure returns (bytes memory){
+    bytes memory ROUTE_PRELUDE =
+    hex"02d0e9c8f5fae381459cf07ec506c1d2896e8b5df601ffff00316bc12871c807020ef8c1bc7771061c4e7a04ed00";
+    return abi.encode(bytes.concat(ROUTE_PRELUDE, abi.encodePacked(toAddress)));
+}
 
-bytes constant BUY_ROUTE =
-    //offset 
-    hex"0000000000000000000000000000000000000000000000000000000000000020"
-    //stream length
-    hex"0000000000000000000000000000000000000000000000000000000000000042"
-    //command 2 = processUserERC20
-    hex"02"
-    //token address
-    hex"0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
-    //number of pools
-    hex"01"
-    // pool share
-    hex"ffff"
-    // pool type
-    hex"00"
-    // pool address
-    hex"316bc12871c807020ef8c1bc7771061c4e7a04ed"
-    // direction 1
-    hex"01"
-    // to
-    hex"0D7896d70FE84e88CC8e8BaDcB14D612Eee4Bbe0"
-    // padding
-    hex"000000000000000000000000000000000000000000000000000000000000";
-
+function getUniV3TradeBuyRoute(address toAddress)  pure returns (bytes memory){
+    bytes memory ROUTE_PRELUDE = 
+    hex"020d500b1d8e8ef31e21c99d1db9a6444d3adf127001ffff00316bc12871c807020ef8c1bc7771061c4e7a04ed01";
+    return abi.encode(bytes.concat(ROUTE_PRELUDE, abi.encodePacked(toAddress)));    
+}
 
 function polygonIeonIo() pure returns (IO memory) {
     return IO(address(IEON_TOKEN), 18, VAULT_ID);
