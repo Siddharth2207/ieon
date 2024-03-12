@@ -1,0 +1,114 @@
+{
+    "$schema": "https://vega.github.io/schema/vega/v5.json",
+    "title": {
+      "text": "IOEN Tranche Space Strategy: Buy Order",
+      "subtitle": [
+        "",
+        "Distributor token : Polygon IOEN",
+        "Reserve token : Polygon WETH",
+        "Tranche reserve base amount : 100 ETH",
+        "Tranche reserve base io ratio : 1.11",
+        "Tranche space threshold : 0.01",
+        "Spread Ratio : 1.01"
+      ],
+      "encode":{
+        "title": {
+          "update": {
+            "fontSize": {"value": 15}
+          }
+        },
+        "subtitle": {
+          "interactive": true,
+          "hover": {
+            "fontStyle": {"value": "normal"}
+          }
+        }
+      }
+    },
+    "width": 800,
+    "height": 500,
+    "padding": 15,
+    "autosize": "pad",
+    "data": [{
+      "name": "tranche-space",
+      "transform": [
+        { "type": "formula","as": "trancheSpaceScaled", "expr": "(datum.trancheSpace)/(1e+18)" },
+        { "type": "formula","as": "amountScaled", "expr": "(datum.amount)/(1e+18)" },
+        { "type": "formula","as": "ratioScaled", "expr": "(datum.ratio)/(1e+18)" }
+
+      ],
+      "format": {
+        "type": "csv",
+        "parse": {
+          "trancheSpace": "number",
+          "amount": "number",
+          "ratio": "number"
+        },
+        "header": ["trancheSpace","amount","ratio"]
+      },
+      "url": "../csvs/tranche-space.csv"
+    }],
+    "scales": [{
+      "name": "x",
+      "type": "linear",
+      "range": "width",
+      "domain": {"data": "tranche-space", "field": "trancheSpaceScaled"}
+    }, {
+      "name": "y",
+      "type": "linear",
+      "range": "height",
+      "domain": {"data": "tranche-space", "field": "amountScaled"}
+    }],
+    "axes": [
+      {
+        "orient": "bottom",
+        "scale": "x",
+        "title": "Fixed point tranche space",
+        "encode": {
+          "labels": {
+            "update": {
+              "fontSize": {"value": 14}
+            }
+          },
+          "title": {
+            "update": {
+              "fontSize": {"value": 14}
+            }
+          }
+        }
+      },
+      {
+        "orient": "left",
+        "scale": "y",
+        "grid": true,
+        "title": "Fixed point amount",
+        "encode": {
+          "labels": {
+            "update": {
+              "fontSize": {"value": 14}
+            }
+          },
+          "title": {
+            "update": {
+              "fontSize": {"value": 14}
+            }
+          }
+        }
+      }
+      
+    ],
+    "marks": [{
+      "type": "line",
+      "from": {"data": "tranche-space"},
+      "encode": {
+        "enter": {
+          "x": {"type": "quantitative","scale": "x", "field": "trancheSpaceScaled"},
+          "y": {"type": "quantitative","scale": "y", "field": "amountScaled"},
+          
+          "angle": {"value": 45},
+          "shape": {"value": "cross"},
+          "size": {"value": 30}
+        }
+      }
+    }]
+  }
